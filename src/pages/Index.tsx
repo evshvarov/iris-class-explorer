@@ -1,16 +1,40 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import ClassList from "@/components/ClassList";
+import ClassDataView from "@/components/ClassDataView";
+import type { PersistentClassInfo } from "@/lib/api";
+import { Database } from "lucide-react";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+export default function Index() {
+  const [selected, setSelected] = useState<PersistentClassInfo | null>(null);
+
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
+    <div className="flex h-screen">
+      {/* Sidebar */}
+      <div className="w-72 shrink-0 border-r border-border bg-card flex flex-col">
+        <div className="flex items-center gap-2 border-b border-border px-4 py-3">
+          <Database className="h-5 w-5 text-primary" />
+          <span className="font-mono text-sm font-bold tracking-tight text-foreground">
+            IRIS <span className="text-primary">Explorer</span>
+          </span>
+        </div>
+        <ClassList onSelect={setSelected} selected={selected?.name} />
+      </div>
+
+      {/* Main */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {selected ? (
+          <ClassDataView key={selected.name} classInfo={selected} />
+        ) : (
+          <div className="flex flex-1 items-center justify-center">
+            <div className="text-center">
+              <Database className="mx-auto h-12 w-12 text-muted-foreground/30" />
+              <p className="mt-4 text-sm text-muted-foreground">
+                Select a class to view its data
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
-};
-
-const Index = PlaceholderIndex;
-
-export default Index;
+}
