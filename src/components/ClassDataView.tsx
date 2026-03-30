@@ -61,44 +61,42 @@ export default function ClassDataView({ classInfo }: ClassDataViewProps) {
       )}
 
       {data && columns.length > 0 && (
-        <ScrollArea className="flex-1">
-          <div className="min-w-max">
-            <Table>
-              <TableHeader>
-                <TableRow className="border-border hover:bg-transparent">
-                  {columns.map((col) => (
-                    <TableHead
-                      key={col}
-                      className="font-mono text-xs text-primary/80 whitespace-nowrap bg-muted/30 border-b border-border"
-                    >
-                      {col}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.items.map((row, i) => (
-                  <TableRow key={i} className="border-border hover:bg-muted/40">
-                    {columns.map((col) => (
-                      <TableCell
-                        key={col}
-                        className="font-mono text-xs whitespace-nowrap max-w-[300px] truncate"
-                      >
-                        {row[col] == null ? (
-                          <span className="text-muted-foreground/50 italic">null</span>
-                        ) : typeof row[col] === "object" ? (
-                          JSON.stringify(row[col])
-                        ) : (
-                          String(row[col])
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
+        <div className="flex-1 overflow-auto relative">
+          <table className="w-full min-w-max border-collapse">
+            <thead className="sticky top-0 z-10">
+              <tr className="border-b border-border">
+                {columns.map((col) => (
+                  <th
+                    key={col}
+                    className="px-4 py-2 text-left font-mono text-xs font-medium text-primary/80 whitespace-nowrap bg-card border-b border-border"
+                  >
+                    {col}
+                  </th>
                 ))}
-              </TableBody>
-            </Table>
-          </div>
-        </ScrollArea>
+              </tr>
+            </thead>
+            <tbody>
+              {data.items.map((row, i) => (
+                <tr key={i} className="border-b border-border hover:bg-muted/40 transition-colors">
+                  {columns.map((col) => (
+                    <td
+                      key={col}
+                      className="px-4 py-2 font-mono text-xs whitespace-nowrap max-w-[300px] truncate text-foreground"
+                    >
+                      {row[col] == null ? (
+                        <span className="text-muted-foreground/50 italic">null</span>
+                      ) : typeof row[col] === "object" ? (
+                        JSON.stringify(row[col])
+                      ) : (
+                        String(row[col])
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {data && columns.length === 0 && (
