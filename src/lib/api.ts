@@ -24,9 +24,17 @@ export interface PersistentClassDataResponse {
   offset: number;
 }
 
-export async function fetchClasses(limit = 200, offset = 0, pkg?: string): Promise<PersistentClassListResponse> {
+export async function fetchClasses(
+  limit = 200,
+  offset = 0,
+  pkg?: string,
+  includeSystem = false,
+  includeMapped = false,
+): Promise<PersistentClassListResponse> {
   const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
   if (pkg) params.set("package", pkg);
+  params.set("includeSystem", String(includeSystem));
+  params.set("includeMapped", String(includeMapped));
   const res = await fetch(`${BASE_URL}/classes?${params}`);
   if (!res.ok) throw new Error(`Failed to fetch classes: ${res.status}`);
   return res.json();
