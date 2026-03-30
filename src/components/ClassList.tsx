@@ -4,6 +4,8 @@ import { fetchClasses, type PersistentClassInfo } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Search, Database, Loader2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 interface ClassListProps {
   onSelect: (cls: PersistentClassInfo) => void;
@@ -12,10 +14,12 @@ interface ClassListProps {
 
 export default function ClassList({ onSelect, selected }: ClassListProps) {
   const [search, setSearch] = useState("");
+  const [includeSystem, setIncludeSystem] = useState(false);
+  const [includeMapped, setIncludeMapped] = useState(false);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["iris-classes"],
-    queryFn: () => fetchClasses(500),
+    queryKey: ["iris-classes", includeSystem, includeMapped],
+    queryFn: () => fetchClasses(500, 0, undefined, includeSystem, includeMapped),
   });
 
   const filtered = data?.items?.filter((c) =>
@@ -36,6 +40,30 @@ export default function ClassList({ onSelect, selected }: ClassListProps) {
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9 bg-muted/50 border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
           />
+        </div>
+        <div className="mt-2.5 flex flex-col gap-1.5">
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="includeSystem"
+              checked={includeSystem}
+              onCheckedChange={(v) => setIncludeSystem(v === true)}
+              className="h-3.5 w-3.5"
+            />
+            <Label htmlFor="includeSystem" className="text-[11px] text-muted-foreground cursor-pointer">
+              System classes
+            </Label>
+          </div>
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="includeMapped"
+              checked={includeMapped}
+              onCheckedChange={(v) => setIncludeMapped(v === true)}
+              className="h-3.5 w-3.5"
+            />
+            <Label htmlFor="includeMapped" className="text-[11px] text-muted-foreground cursor-pointer">
+              Mapped classes
+            </Label>
+          </div>
         </div>
       </div>
 
