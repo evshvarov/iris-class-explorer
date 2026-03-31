@@ -40,6 +40,12 @@ export interface PersistentClassStatsResponse {
   columns: PersistentClassColumnStats[];
 }
 
+export async function fetchClassStats(className: string): Promise<PersistentClassStatsResponse> {
+  const res = await fetch(`${BASE_URL}/classes/${encodeURIComponent(className)}/stats`);
+  if (!res.ok) throw new Error(`Failed to fetch stats: ${res.status}`);
+  return res.json();
+}
+
 export async function fetchClasses(
   limit = 200,
   offset = 0,
