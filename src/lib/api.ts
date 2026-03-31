@@ -24,6 +24,22 @@ export interface PersistentClassDataResponse {
   offset: number;
 }
 
+export interface PersistentClassColumnStats {
+  name: string;
+  type: string;
+  populatedCount: number;
+  emptyCount: number;
+  populatedPercent: number;
+  emptyPercent: number;
+}
+
+export interface PersistentClassStatsResponse {
+  namespace: string;
+  className: string;
+  totalRows: number;
+  columns: PersistentClassColumnStats[];
+}
+
 export async function fetchClasses(
   limit = 200,
   offset = 0,
