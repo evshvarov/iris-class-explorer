@@ -1,0 +1,10 @@
+# switch to test registry
+zpm
+repo -n registry -r -url https://test.pm.community.intersystems.com/registry/ -user test -pass PassWord42
+
+publish iris-table-stats-frontend -v
+
+repo -r -n registry -url https://pm.community.intersystems.com/ -user "" -pass ""
+
+exit
+halt

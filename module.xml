@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+  <Document name="iris-table-stats-frontend.ZPM">
+    <Module>
+      <Name>iris-table-stats-frontend</Name>
+      <Version>1.0.0</Version>
+      <Description>Frontend for iris-table-stats backend </Description>
+      <Keywords>REST,Frontend,React,Lovable</Keywords>
+      <Packaging>module</Packaging>
+
+      <FileCopy Name="dist/" Target="${cspdir}iris-table-stats-ui/" Defer="1"/>
+
+      <WebApplication
+        Name="/iris-table-stats-ui"
+        NameSpace="USER"
+        Path="${cspdir}iris-table-stats-ui/"
+        Recurse="1"
+        ServeFiles="1"
+        CookiePath="/iris-table-stats-ui"
+      />
+      <SourcesRoot>src</SourcesRoot>
+    </Module>
+  </Document>
+</Export>

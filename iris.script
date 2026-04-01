@@ -1,0 +1,13 @@
+    // Unexpire passwords to simplify dev mode. Comment these two lines for Production use
+    zn "%SYS"
+    do $system.OBJ.Load("/tmp/zpm.xml", "ck")
+    zpm "enable -map -globally"
+    zpm "enable -community"
+    
+    Do ##class(Security.Users).UnExpireUserPasswords("*")
+
+
+    // load all the code of the project as a ZPM package
+    zn "USER"
+    zpm "load /home/irisowner/dev/ -v":1:1
+    halt
