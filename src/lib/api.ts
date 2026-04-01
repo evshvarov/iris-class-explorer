@@ -1,4 +1,12 @@
-const BASE_URL = "https://iris-table-stats.sandbox.developer.intersystems.com/iris-table-stats/api";
+let _baseUrl = "/iris-table-stats/api";
+
+export function setApiBaseUrl(url: string) {
+  _baseUrl = url;
+}
+
+export function getApiBaseUrl() {
+  return _baseUrl;
+}
 
 export interface PersistentClassInfo {
   name: string;
@@ -41,7 +49,7 @@ export interface PersistentClassStatsResponse {
 }
 
 export async function fetchClassStats(className: string): Promise<PersistentClassStatsResponse> {
-  const res = await fetch(`${BASE_URL}/classes/${encodeURIComponent(className)}/stats`);
+  const res = await fetch(`${_baseUrl}/classes/${encodeURIComponent(className)}/stats`);
   if (!res.ok) throw new Error(`Failed to fetch stats: ${res.status}`);
   return res.json();
 }
@@ -57,14 +65,14 @@ export async function fetchClasses(
   if (pkg) params.set("package", pkg);
   params.set("includeSystem", String(includeSystem));
   params.set("includeMapped", String(includeMapped));
-  const res = await fetch(`${BASE_URL}/classes?${params}`);
+  const res = await fetch(`${_baseUrl}/classes?${params}`);
   if (!res.ok) throw new Error(`Failed to fetch classes: ${res.status}`);
   return res.json();
 }
 
 export async function fetchClassData(className: string, limit = 100, offset = 0): Promise<PersistentClassDataResponse> {
   const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
-  const res = await fetch(`${BASE_URL}/classes/${encodeURIComponent(className)}/data?${params}`);
+  const res = await fetch(`${_baseUrl}/classes/${encodeURIComponent(className)}/data?${params}`);
   if (!res.ok) throw new Error(`Failed to fetch data: ${res.status}`);
   return res.json();
 }
