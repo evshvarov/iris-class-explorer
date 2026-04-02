@@ -15,6 +15,16 @@ This UI connects to the `iris-table-stats` backend API and provides:
 - a stats tab to inspect column population percentages, populated counts, and empty counts
 - a configurable backend API URL stored in browser local storage
 
+## Screenshots
+
+### Data view
+
+![IRIS Class Explorer data view](docs/screenshots/data-view.png)
+
+### Stats view
+
+![IRIS Class Explorer stats view](docs/screenshots/stats-view.png)
+
 By default, the UI expects the backend API at:
 
 ```text
