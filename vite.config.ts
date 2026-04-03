@@ -5,10 +5,11 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  const productionBasePath = "/iris-table-stats-ui/";
+  // Use /iris-table-stats-ui/ base only for IRIS deployment builds (npm run build:dist)
+  const irisBase = process.env.IRIS_BUILD === "true" ? "/iris-table-stats-ui/" : "/";
 
   return {
-    base: mode === "development" ? "/" : productionBasePath,
+    base: mode === "development" ? "/" : irisBase,
     server: {
       host: "::",
       port: 8080,
