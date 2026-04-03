@@ -88,8 +88,3 @@ export async function fetchClassData(className: string, limit = 100, offset = 0)
   if (!res.ok) throw new Error(`Failed to fetch data: ${res.status}`);
   return res.json();
 }
-  const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
-  const res = await fetch(`${_baseUrl}/classes/${encodeURIComponent(className)}/data?${params}`);
-  if (!res.ok) throw new Error(`Failed to fetch data: ${res.status}`);
-  return res.json();
-}
