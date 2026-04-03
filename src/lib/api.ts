@@ -70,6 +70,18 @@ export async function fetchClasses(
   return res.json();
 }
 
+export async function fetchEmptyRecords(
+  className: string,
+  columnName: string,
+  limit = 100,
+  offset = 0,
+): Promise<PersistentClassDataResponse> {
+  const params = new URLSearchParams({ columnName, limit: String(limit), offset: String(offset) });
+  const res = await fetch(`${_baseUrl}/classes/${encodeURIComponent(className)}/empty-records?${params}`);
+  if (!res.ok) throw new Error(`Failed to fetch empty records: ${res.status}`);
+  return res.json();
+}
+
 export async function fetchClassData(className: string, limit = 100, offset = 0): Promise<PersistentClassDataResponse> {
   const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
   const res = await fetch(`${_baseUrl}/classes/${encodeURIComponent(className)}/data?${params}`);

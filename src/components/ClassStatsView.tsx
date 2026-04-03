@@ -1,8 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchClassStats, type PersistentClassColumnStats } from "@/lib/api";
-import { Loader2, RefreshCw } from "lucide-react";
+import { fetchClassStats, fetchEmptyRecords, type PersistentClassColumnStats } from "@/lib/api";
+import { Loader2, RefreshCw, ChevronDown, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { useState } from "react";
 
 interface ClassStatsViewProps {
@@ -12,6 +11,7 @@ interface ClassStatsViewProps {
 export default function ClassStatsView({ className }: ClassStatsViewProps) {
   const queryClient = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [expandedColumn, setExpandedColumn] = useState<string | null>(null);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["iris-class-stats", className],
@@ -71,7 +71,22 @@ export default function ClassStatsView({ className }: ClassStatsViewProps) {
       <div className="flex-1 overflow-auto p-6">
         <div className="space-y-3 max-w-2xl">
           {sorted.map((col) => (
-            <ColumnStatRow key={col.name} col={col} />
+            <div key={col.name}>
+              <ColumnStatRow
+                col={col}
+                isExpanded={expandedColumn === col.name}
+                onToggleEmpty={() =>
+                  setExpandedColumn(expandedColumn === col.name ? null : col.name)
+                }
+              />
+              {expandedColumn === col.name && col.emptyCount > 0 && (
+                <EmptyRecordsPanel
+                  className={className}
+                  columnName={col.name}
+                  onClose={() => setExpandedColumn(null)}
+                />
+              )}
+            </div>
           ))}
           {sorted.length === 0 && (
             <div className="text-sm text-muted-foreground text-center py-8">
@@ -84,7 +99,15 @@ export default function ClassStatsView({ className }: ClassStatsViewProps) {
   );
 }
 
-function ColumnStatRow({ col }: { col: PersistentClassColumnStats }) {
+function ColumnStatRow({
+  col,
+  isExpanded,
+  onToggleEmpty,
+}: {
+  col: PersistentClassColumnStats;
+  isExpanded: boolean;
+  onToggleEmpty: () => void;
+}) {
   const pct = Math.round(col.populatedPercent * 100) / 100;
   const color =
     pct >= 90
@@ -114,8 +137,134 @@ function ColumnStatRow({ col }: { col: PersistentClassColumnStats }) {
       </div>
       <div className="flex justify-between mt-1 text-[10px] text-muted-foreground font-mono">
         <span>{col.populatedCount} populated</span>
-        <span>{col.emptyCount} empty</span>
+        {col.emptyCount > 0 ? (
+          <button
+            onClick={onToggleEmpty}
+            className="flex items-center gap-0.5 text-destructive hover:underline cursor-pointer"
+          >
+            {col.emptyCount} empty
+            <ChevronDown
+              className={`h-3 w-3 transition-transform ${isExpanded ? "rotate-180" : ""}`}
+            />
+          </button>
+        ) : (
+          <span>{col.emptyCount} empty</span>
+        )}
       </div>
+    </div>
+  );
+}
+
+const EMPTY_PAGE_SIZE = 50;
+
+function EmptyRecordsPanel({
+  className,
+  columnName,
+  onClose,
+}: {
+  className: string;
+  columnName: string;
+  onClose: () => void;
+}) {
+  const [offset, setOffset] = useState(0);
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["iris-empty-records", className, columnName, offset],
+    queryFn: () => fetchEmptyRecords(className, columnName, EMPTY_PAGE_SIZE, offset),
+  });
+
+  const columns = data?.items?.length ? Object.keys(data.items[0]) : [];
+
+  return (
+    <div className="mt-1 rounded-lg border border-border bg-card p-3">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs font-medium text-foreground">
+          Records with empty <span className="font-mono text-primary">{columnName}</span>
+        </span>
+        <Button variant="ghost" size="sm" onClick={onClose} className="h-6 w-6 p-0">
+          <X className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+
+      {isLoading && (
+        <div className="flex items-center justify-center py-4 text-muted-foreground text-xs">
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading…
+        </div>
+      )}
+
+      {error && (
+        <div className="text-xs text-destructive py-4 text-center">Failed to load empty records</div>
+      )}
+
+      {data && columns.length > 0 && (
+        <>
+          <div className="overflow-auto max-h-64 rounded border border-border">
+            <table className="w-full min-w-max border-collapse text-xs">
+              <thead className="sticky top-0 z-10">
+                <tr>
+                  {columns.map((col) => (
+                    <th
+                      key={col}
+                      className="px-3 py-1.5 text-left font-mono font-medium text-primary/80 whitespace-nowrap bg-muted border-b border-border"
+                    >
+                      {col}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {data.items.map((row, i) => (
+                  <tr key={i} className="border-b border-border hover:bg-muted/40 transition-colors">
+                    {columns.map((col) => (
+                      <td
+                        key={col}
+                        className="px-3 py-1.5 font-mono whitespace-nowrap max-w-[200px] truncate text-foreground"
+                      >
+                        {row[col] == null ? (
+                          <span className="text-muted-foreground/50 italic">null</span>
+                        ) : typeof row[col] === "object" ? (
+                          JSON.stringify(row[col])
+                        ) : (
+                          String(row[col])
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="flex items-center justify-between mt-2">
+            <span className="text-[10px] text-muted-foreground font-mono">
+              {data.count} records · {offset + 1}–{Math.min(offset + EMPTY_PAGE_SIZE, data.count)}
+            </span>
+            <div className="flex gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={offset === 0}
+                onClick={() => setOffset(Math.max(0, offset - EMPTY_PAGE_SIZE))}
+                className="h-6 px-1.5"
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={offset + EMPTY_PAGE_SIZE >= data.count}
+                onClick={() => setOffset(offset + EMPTY_PAGE_SIZE)}
+                className="h-6 px-1.5"
+              >
+                <ChevronRight className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {data && columns.length === 0 && (
+        <div className="text-xs text-muted-foreground text-center py-4">No empty records found</div>
+      )}
     </div>
   );
 }
