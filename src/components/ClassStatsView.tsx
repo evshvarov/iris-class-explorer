@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchClassStats, fetchEmptyRecords, type PersistentClassColumnStats } from "@/lib/api";
-import { Loader2, RefreshCw, ChevronDown, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Loader2, RefreshCw, ChevronDown, ChevronLeft, ChevronRight, X, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
