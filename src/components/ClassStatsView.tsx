@@ -175,15 +175,37 @@ function EmptyRecordsPanel({
 
   const columns = data?.items?.length ? Object.keys(data.items[0]) : [];
 
+  const handleExportCsv = () => {
+    if (!data?.items?.length) return;
+    const cols = Object.keys(data.items[0]);
+    const escape = (v: unknown) => {
+      const s = v == null ? "" : typeof v === "object" ? JSON.stringify(v) : String(v);
+      return s.includes(",") || s.includes('"') || s.includes("\n") ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const csv = [cols.join(","), ...data.items.map(r => cols.map(c => escape(r[c])).join(","))].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${className}_empty_${columnName}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="mt-1 rounded-lg border border-border bg-card p-3">
       <div className="flex items-center justify-between mb-2">
         <span className="text-xs font-medium text-foreground">
           Records with empty <span className="font-mono text-primary">{columnName}</span>
         </span>
-        <Button variant="ghost" size="sm" onClick={onClose} className="h-6 w-6 p-0">
-          <X className="h-3.5 w-3.5" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="sm" onClick={handleExportCsv} disabled={!data?.items?.length} className="h-6 px-1.5 text-xs">
+            <Download className="h-3.5 w-3.5 mr-1" /> CSV
+          </Button>
+          <Button variant="ghost" size="sm" onClick={onClose} className="h-6 w-6 p-0">
+            <X className="h-3.5 w-3.5" />
+          </Button>
+        </div>
       </div>
 
       {isLoading && (
